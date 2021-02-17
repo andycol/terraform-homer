@@ -8,13 +8,32 @@ terraform {
 }
 provider "aws" {
   profile = "default"
-  region  = "eu-central-1"
+  region  = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key 
+
 }
 
 resource "aws_instance" "web" {
 
-  ami           = ""
-  instance_type = "t2.micro"
+  ami             = lookup(var.amis, var.region) 
+  subnet_id       = var.subnet 
+  security_groups = var.securityGroups 
+  key_name        = var.keyName 
+  instance_type   = var.instanceType 
+
+   ebs_block_device {
+    device_name = "/dev/xvdb"
+    volume_type = "gp2"
+    volume_size = var.DiskSize 
+  }
+  tags = {
+    Name = var.instanceName
+  }
+
+
+
+
   provisioner "file" {
   source 	= "files/homer_installer.sh"
   destination	= "/tmp/homer_installer.sh" 
